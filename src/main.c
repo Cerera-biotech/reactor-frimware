@@ -1,4 +1,17 @@
+#include <stdio.h>
+#include <string.h>
+#include <esp_wifi.h>
+#include <esp_netif.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_system.h"
+#include "esp_log.h"
+
 #include "wifi_manager.h"
+
+/* @brief tag used for ESP serial console messages */
+static const char TAG[] = "main";
+
 
 /**
  * @brief this is an exemple of a callback that you can setup in your own app to get notified of wifi manager event.
@@ -19,5 +32,5 @@ void app_main() {
 
 	/* register a callback as an example to how you can integrate your code with the wifi manager */
 	wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
-    
+
 }
