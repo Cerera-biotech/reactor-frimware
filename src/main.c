@@ -10,6 +10,7 @@
 #include "wifi_manager.h"
 
 #include "httpserver.h"
+#include "led.h"
 
 /* @brief tag used for ESP serial console messages */
 static const char TAG[] = "main";
@@ -54,4 +55,5 @@ void app_main()
     /* register a callback as an example to how you can integrate your code with the wifi manager */
     wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
     wifi_manager_set_callback(WM_EVENT_STA_DISCONNECTED, &cb_connection_disconnected);
+    led_init();
 }
