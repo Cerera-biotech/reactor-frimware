@@ -1,3 +1,4 @@
+#pragma once
 #include "driver/ledc.h"
 
 #include "pin_config.h"
@@ -11,6 +12,8 @@
 #define LEDC_TEST_CH_NUM (10)
 #define LEDC_TEST_DUTY (4000)
 #define LEDC_TEST_FADE_TIME (3000)
+
+static const char LED_TAG[] = "led";
 
 /*
      * Prepare individual configuration

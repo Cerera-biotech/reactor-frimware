@@ -1,5 +1,9 @@
 #include <esp_http_server.h>
 #include <sys/param.h>
+#include "led.h"
+
+/* @brief tag used for ESP serial console messages */
+static const char HTTP_TAG[] = "HTTP_SERVER";
 
 /* Our URI handler function to be called during GET /uri request */
 esp_err_t get_handler(httpd_req_t *req)
@@ -18,15 +22,17 @@ esp_err_t post_handler(httpd_req_t *req)
      * as well be any binary data (needs type casting).
      * In case of string data, null termination will be absent, and
      * content length would give length of string */
-    char content[100];
+    char content[250];
 
     /* Truncate if content length larger than the buffer */
     size_t recv_size = MIN(req->content_len, sizeof(content));
 
     int ret = httpd_req_recv(req, content, recv_size);
-    if (ret <= 0) {  /* 0 return value indicates connection closed */
+    if (ret <= 0)
+    { /* 0 return value indicates connection closed */
         /* Check if timeout occurred */
-        if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
+        if (ret == HTTPD_SOCK_ERR_TIMEOUT)
+        {
             /* In case of timeout one can choose to retry calling
              * httpd_req_recv(), but to keep it simple, here we
              * respond with an HTTP 408 (Request Timeout) error */
@@ -37,27 +43,63 @@ esp_err_t post_handler(httpd_req_t *req)
         return ESP_FAIL;
     }
 
-    /* Send a simple response */
-    const char resp[] = "URI POST Response";
-    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    return ESP_OK;
+    uint8_t channel;
+    uint32_t duty;
+
+    bool duty_found, channel_found = false;
+    /* Read URL query string length and allocate memory for length + 1,
+     * extra byte for null termination */
+    size_t buf_len = httpd_req_get_url_query_len(req) + 1;
+    if (buf_len > 1)
+    {
+        char *buf = malloc(buf_len);
+        if (httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK)
+        {
+            ESP_LOGI(HTTP_TAG, "Found URL query => %s", buf);
+            char param[32];
+            /* Get value of expected key from query string */
+            if (httpd_query_key_value(buf, "channel", param, sizeof(param)) == ESP_OK)
+            {
+                ESP_LOGI(HTTP_TAG, "Found URL query parameter => channel=%s", param);
+                channel = atoi(param);
+                channel_found = true;
+            }
+            if (httpd_query_key_value(buf, "duty", param, sizeof(param)) == ESP_OK)
+            {
+                ESP_LOGI(HTTP_TAG, "Found URL query parameter => duty=%s", param);
+                duty = atoi(param);
+                duty_found = true;
+            }
+        }
+        free(buf);
+    }
+
+    if (duty_found && channel_found)
+    {
+        set_duty_with_fade_for_channel(channel, duty);
+        httpd_resp_send(req, "", HTTPD_RESP_USE_STRLEN);
+        return ESP_OK;
+    }
+    else
+    {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "duty and channel parameters should exist");
+        return ESP_OK;
+    }
 }
 
 /* URI handler structure for GET /uri */
 httpd_uri_t uri_get = {
-    .uri      = "/uri",
-    .method   = HTTP_GET,
-    .handler  = get_handler,
-    .user_ctx = NULL
-};
+    .uri = "/channels",
+    .method = HTTP_GET,
+    .handler = get_handler,
+    .user_ctx = NULL};
 
 /* URI handler structure for POST /uri */
 httpd_uri_t uri_post = {
-    .uri      = "/uri",
-    .method   = HTTP_POST,
-    .handler  = post_handler,
-    .user_ctx = NULL
-};
+    .uri = "/channels",
+    .method = HTTP_PUT,
+    .handler = post_handler,
+    .user_ctx = NULL};
 
 /* Function for starting the webserver */
 httpd_handle_t start_webserver(void)
@@ -69,7 +111,8 @@ httpd_handle_t start_webserver(void)
     httpd_handle_t server = NULL;
 
     /* Start the httpd server */
-    if (httpd_start(&server, &config) == ESP_OK) {
+    if (httpd_start(&server, &config) == ESP_OK)
+    {
         /* Register URI handlers */
         httpd_register_uri_handler(server, &uri_get);
         httpd_register_uri_handler(server, &uri_post);
@@ -81,7 +124,8 @@ httpd_handle_t start_webserver(void)
 /* Function for stopping the webserver */
 void stop_webserver(httpd_handle_t server)
 {
-    if (server) {
+    if (server)
+    {
         /* Stop the httpd server */
         httpd_stop(server);
     }
