@@ -96,6 +96,9 @@ static void event_handler(void *arg, esp_event_base_t event_base,
         ESP_LOGI(WIFI_TAG, "SSID:%s", ssid);
         ESP_LOGI(WIFI_TAG, "PASSWORD:%s", password);
 
+        nvs_set_ssid(&ssid);
+        nvs_set_pwd(&password);
+
         ESP_ERROR_CHECK(esp_wifi_disconnect());
         ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
         ESP_ERROR_CHECK(esp_wifi_connect());
@@ -187,7 +190,7 @@ void wifi_init_sta(void)
     vEventGroupDelete(s_wifi_event_group);
 }
 
-static void initialise_wifi(void)
+static void wifi_init_smartconfig(void)
 {
     ESP_ERROR_CHECK(esp_netif_init());
     s_wifi_event_group = xEventGroupCreate();

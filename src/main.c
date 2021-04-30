@@ -30,7 +30,10 @@ void app_main(void)
     ESP_LOGI(TAG, "mode button state %d\n", mode_button_state);
     if (mode_button_state == 1)
     {
-        start_smart_config = true;
+        wifi_init_smartconfig();
     }
-    initialise_wifi();
+    else
+    {
+        wifi_init_sta();
+    }
 }

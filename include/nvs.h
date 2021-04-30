@@ -34,7 +34,7 @@ void nvs_get_ssid(char *ssid)
 
         // Read
         printf("Reading restart counter from NVS ... ");
-        err = nvs_get_str(my_handle, "ssid", &ssid, 33);
+        err = nvs_get_str(my_handle, "ssid", ssid, 33);
         switch (err)
         {
         case ESP_OK:
@@ -108,7 +108,7 @@ void nvs_get_pwd(char *pwd)
 
         // Read
         printf("Reading restart counter from NVS ... ");
-        err = nvs_get_str(my_handle, "pwd", &pwd, 65);
+        err = nvs_get_str(my_handle, "pwd", pwd, 65);
         switch (err)
         {
         case ESP_OK:
