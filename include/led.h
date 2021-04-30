@@ -2,6 +2,7 @@
 #include "driver/ledc.h"
 
 #include "pin_config.h"
+#include "nvs.h"
 
 #define LEDC_HS_TIMER LEDC_TIMER_0
 #define LEDC_HS_MODE LEDC_HIGH_SPEED_MODE
@@ -90,6 +91,14 @@ ledc_channel_config_t ledc_channel[LEDC_TEST_CH_NUM] = {
      .hpoint = 0,
      .timer_sel = LEDC_LS_TIMER}};
 
+void set_duty_with_fade_for_channel(uint8_t ch, uint32_t target_duty)
+{
+    ledc_set_fade_with_time(ledc_channel[ch].speed_mode,
+                            ledc_channel[ch].channel, target_duty, LEDC_TEST_FADE_TIME);
+    ledc_fade_start(ledc_channel[ch].speed_mode,
+                    ledc_channel[ch].channel, LEDC_FADE_NO_WAIT);
+}
+
 void led_init(void)
 {
     /*
@@ -114,16 +123,10 @@ void led_init(void)
     for (uint8_t ch = 0; ch < LEDC_TEST_CH_NUM; ch++)
     {
         ledc_channel_config(&ledc_channel[ch]);
+        uint32_t duty = nvs_get_ch_value(ch);
+        set_duty_with_fade_for_channel(ch, duty);
     }
 
     // Initialize fade service.
     ledc_fade_func_install(0);
-}
-
-void set_duty_with_fade_for_channel(uint8_t ch, uint32_t target_duty)
-{
-    ledc_set_fade_with_time(ledc_channel[ch].speed_mode,
-                            ledc_channel[ch].channel, target_duty, LEDC_TEST_FADE_TIME);
-    ledc_fade_start(ledc_channel[ch].speed_mode,
-                    ledc_channel[ch].channel, LEDC_FADE_NO_WAIT);
 }

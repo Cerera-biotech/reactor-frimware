@@ -9,3 +9,5 @@
 #define GPIO_LED_CH7 7
 #define GPIO_LED_CH8 8
 #define GPIO_LED_CH9 19
+
+#define GPIO_MODE_BUTTON 35

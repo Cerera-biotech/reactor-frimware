@@ -1,6 +1,7 @@
 #include <esp_http_server.h>
 #include <sys/param.h>
 #include "led.h"
+#include "nvs.h"
 
 /* @brief tag used for ESP serial console messages */
 static const char HTTP_TAG[] = "HTTP_SERVER";
@@ -76,6 +77,7 @@ esp_err_t post_handler(httpd_req_t *req)
 
     if (duty_found && channel_found)
     {
+        nvs_set_ch_value(channel, duty);
         set_duty_with_fade_for_channel(channel, duty);
         httpd_resp_send(req, "", HTTPD_RESP_USE_STRLEN);
         return ESP_OK;
