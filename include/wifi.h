@@ -18,8 +18,9 @@
 #include "nvs_flash.h"
 #include "esp_netif.h"
 #include "esp_smartconfig.h"
-#include "button.h"
 #include "nvs.h"
+#include "led.h"
+#include "httpserver.h"
 
 /* The examples use WiFi configuration that you can set via project configuration menu
    If you'd rather not, just change the below entries to strings with
@@ -30,30 +31,23 @@
 /* FreeRTOS event group to signal when we are connected & ready to make a request */
 static EventGroupHandle_t s_wifi_event_group;
 
-bool start_smart_config = false;
 /* The event group allows multiple bits for each event,
    but we only care about one event - are we connected
    to the AP with an IP? */
 static const int CONNECTED_BIT = BIT0;
 static const int ESPTOUCH_DONE_BIT = BIT1;
-// static const int WIFI_FAIL_BIT = BIT1;
+static const int WIFI_FAIL_BIT = BIT1;
 static const char *WIFI_TAG = "wifi_config";
 static int s_retry_num = 0;
 
 static void smartconfig_example_task(void *parm);
 
-static void event_handler(void *arg, esp_event_base_t event_base,
-                          int32_t event_id, void *event_data)
+static void smart_config_event_handler(void *arg, esp_event_base_t event_base,
+                                       int32_t event_id, void *event_data)
 {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
     {
-        if (start_smart_config)
-        {
-            xTaskCreate(smartconfig_example_task, "smartconfig_example_task", 4096, NULL, 3, NULL);
-        }
-        else
-        {
-        }
+        xTaskCreate(smartconfig_example_task, "smartconfig_example_task", 4096, NULL, 3, NULL);
     }
     else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
     {
@@ -96,9 +90,6 @@ static void event_handler(void *arg, esp_event_base_t event_base,
         ESP_LOGI(WIFI_TAG, "SSID:%s", ssid);
         ESP_LOGI(WIFI_TAG, "PASSWORD:%s", password);
 
-        nvs_set_ssid(&ssid);
-        nvs_set_pwd(&password);
-
         ESP_ERROR_CHECK(esp_wifi_disconnect());
         ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
         ESP_ERROR_CHECK(esp_wifi_connect());
@@ -106,6 +97,36 @@ static void event_handler(void *arg, esp_event_base_t event_base,
     else if (event_base == SC_EVENT && event_id == SC_EVENT_SEND_ACK_DONE)
     {
         xEventGroupSetBits(s_wifi_event_group, ESPTOUCH_DONE_BIT);
+    }
+}
+
+static void sta_event_handler(void *arg, esp_event_base_t event_base,
+                              int32_t event_id, void *event_data)
+{
+    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
+    {
+        esp_wifi_connect();
+    }
+    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
+    {
+        if (s_retry_num < EXAMPLE_ESP_MAXIMUM_RETRY)
+        {
+            esp_wifi_connect();
+            s_retry_num++;
+            ESP_LOGI(WIFI_TAG, "retry to connect to the AP");
+        }
+        else
+        {
+            xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+        }
+        ESP_LOGI(WIFI_TAG, "connect to the AP fail");
+    }
+    else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
+    {
+        ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
+        ESP_LOGI(WIFI_TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+        s_retry_num = 0;
+        xEventGroupSetBits(s_wifi_event_group, CONNECTED_BIT);
     }
 }
 
@@ -125,34 +146,20 @@ void wifi_init_sta(void)
     esp_event_handler_instance_t instance_got_ip;
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
                                                         ESP_EVENT_ANY_ID,
-                                                        &event_handler,
+                                                        &sta_event_handler,
                                                         NULL,
                                                         &instance_any_id));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
                                                         IP_EVENT_STA_GOT_IP,
-                                                        &event_handler,
+                                                        &sta_event_handler,
                                                         NULL,
                                                         &instance_got_ip));
 
-    unsigned char ssid[33] = {0};
-    unsigned char password[65] = {0};
-    nvs_get_ssid(&ssid);
-    nvs_get_pwd(&password);
+    wifi_config_t wifi_config;
+    esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
+    ESP_LOGI(WIFI_TAG, "SSID:%s", wifi_config.sta.ssid);
+    ESP_LOGI(WIFI_TAG, "PASSWORD:%s", wifi_config.sta.password);
 
-    wifi_config_t wifi_config = {
-        .sta = {
-            .ssid = {ssid},
-            .password = {password},
-            /* Setting a password implies station will connect to all security modes including WEP/WPA.
-             * However these modes are deprecated and not advisable to be used. Incase your Access point
-             * doesn't support WPA2, these mode can be enabled by commenting below line */
-            .threshold.authmode = WIFI_AUTH_WPA2_PSK,
-
-            .pmf_cfg = {
-                .capable = true,
-                .required = false},
-        },
-    };
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
@@ -171,13 +178,17 @@ void wifi_init_sta(void)
      * happened. */
     if (bits & CONNECTED_BIT)
     {
-        // ESP_LOGI(WIFI_TAG, "connected to ap SSID:%s password:%s", //todo replace with actual data
-        //          EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+        ESP_LOGI(WIFI_TAG, "connected to ap SSID:%s password:%s",
+                 wifi_config.sta.ssid, wifi_config.sta.password);
+
+        led_init();
+        start_webserver();
     }
+
     else if (bits & ESPTOUCH_DONE_BIT)
     {
-        // ESP_LOGI(WIFI_TAG, "Failed to connect to SSID:%s, password:%s", //todo replace with actual data
-        //          EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+        ESP_LOGI(WIFI_TAG, "Failed to connect to SSID:%s, password:%s",
+                 wifi_config.sta.ssid, wifi_config.sta.password);
     }
     else
     {
@@ -201,9 +212,9 @@ static void wifi_init_smartconfig(void)
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(SC_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &smart_config_event_handler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &smart_config_event_handler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(SC_EVENT, ESP_EVENT_ANY_ID, &smart_config_event_handler, NULL));
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_start());
