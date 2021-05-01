@@ -15,6 +15,16 @@ esp_err_t get_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
+
+/* Our URI handler function to be called during GET /uri request */
+esp_err_t get_root_handler(httpd_req_t *req)
+{
+    /* Send a simple response */
+    const char resp[] = "URI GET Response";
+    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+    return ESP_OK;
+}
+
 /* Our URI handler function to be called during POST /uri request */
 esp_err_t put_handler(httpd_req_t *req)
 {
@@ -96,6 +106,13 @@ httpd_uri_t uri_get = {
     .handler = get_handler,
     .user_ctx = NULL};
 
+    /* URI handler structure for GET /uri */
+httpd_uri_t uri_get_root = {
+    .uri = "/",
+    .method = HTTP_GET,
+    .handler = get_root_handler,
+    .user_ctx = NULL};
+
 /* URI handler structure for POST /uri */
 httpd_uri_t uri_post = {
     .uri = "/channels",
@@ -117,6 +134,8 @@ void start_webserver(void)
         /* Register URI handlers */
         httpd_register_uri_handler(server, &uri_get);
         httpd_register_uri_handler(server, &uri_post);
+        httpd_register_uri_handler(server, &uri_get_root);
+        
     }
 }
 

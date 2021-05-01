@@ -4,7 +4,7 @@
 #include "pin_config.h"
 #include "nvs.h"
 
-#define LEDC_TEST_CH_NUM (5)
+#define LEDC_TEST_CH_NUM (10)
 #define LEDC_TEST_DUTY (4000)
 #define LEDC_TEST_FADE_TIME (3000)
 
@@ -54,36 +54,37 @@ ledc_channel_config_t ledc_channel[LEDC_TEST_CH_NUM] = {
      .speed_mode = LEDC_HIGH_SPEED_MODE,
      .hpoint = 0,
      .timer_sel = LEDC_TIMER_1},
-    {.channel = LEDC_CHANNEL_5,
-     .duty = 0,
-     .gpio_num = GPIO_LED_CH5,
-     .speed_mode = LEDC_HIGH_SPEED_MODE,
-     .hpoint = 0,
-     .timer_sel = LEDC_TIMER_1},
-    {.channel = LEDC_CHANNEL_6,
-     .duty = 0,
-     .gpio_num = GPIO_LED_CH6,
-     .speed_mode = LEDC_HIGH_SPEED_MODE,
-     .hpoint = 0,
-     .timer_sel = LEDC_TIMER_1},
-    {.channel = LEDC_CHANNEL_7,
-     .duty = 0,
-     .gpio_num = GPIO_LED_CH7,
-     .speed_mode = LEDC_HIGH_SPEED_MODE,
-     .hpoint = 0,
-     .timer_sel = LEDC_TIMER_1},
+    //low speed cahnnels
     {.channel = LEDC_CHANNEL_0,
      .duty = 0,
-     .gpio_num = GPIO_LED_CH8,
+     .gpio_num = GPIO_LED_CH5,
      .speed_mode = LEDC_LOW_SPEED_MODE,
      .hpoint = 0,
      .timer_sel = LEDC_TIMER_2},
     {.channel = LEDC_CHANNEL_1,
      .duty = 0,
+     .gpio_num = GPIO_LED_CH6,
+     .speed_mode = LEDC_LOW_SPEED_MODE,
+     .hpoint = 0,
+     .timer_sel = LEDC_TIMER_2},
+    {.channel = LEDC_CHANNEL_2,
+     .duty = 0,
+     .gpio_num = GPIO_LED_CH7,
+     .speed_mode = LEDC_LOW_SPEED_MODE,
+     .hpoint = 0,
+     .timer_sel = LEDC_TIMER_2},
+    {.channel = LEDC_CHANNEL_3,
+     .duty = 0,
+     .gpio_num = GPIO_LED_CH8,
+     .speed_mode = LEDC_LOW_SPEED_MODE,
+     .hpoint = 0,
+     .timer_sel = LEDC_TIMER_3},
+    {.channel = LEDC_CHANNEL_4,
+     .duty = 0,
      .gpio_num = GPIO_LED_CH9,
      .speed_mode = LEDC_LOW_SPEED_MODE,
      .hpoint = 0,
-     .timer_sel = LEDC_TIMER_2}};
+     .timer_sel = LEDC_TIMER_3}};
 
 void set_duty_with_fade_for_channel(uint8_t ch, uint32_t target_duty)
 {
@@ -123,10 +124,15 @@ void led_init(void)
     // Set configuration of timer2 for low speed channels
     ledc_timer_config(&timer_config);
 
+    timer_config.speed_mode = LEDC_LOW_SPEED_MODE;
+    timer_config.timer_num = LEDC_TIMER_3;
+    // Set configuration of timer3 for low speed channels
+    ledc_timer_config(&timer_config);
+
     // Set LED Controller with previously prepared configuration
     for (uint8_t ch = 0; ch < LEDC_TEST_CH_NUM; ch++)
     {
-        ESP_LOGI(LED_TAG, "configuring cahnnel %d on gpio %d", ch, ledc_channel[ch].gpio_num);
+        ESP_LOGI(LED_TAG, "configuring %d cahnnel %d on gpio %d ledc: %d", ledc_channel[ch].speed_mode, ch, ledc_channel[ch].gpio_num, ledc_channel[ch].channel);
         ledc_channel_config(&ledc_channel[ch]);
         ESP_LOGI(LED_TAG, "done");
     }

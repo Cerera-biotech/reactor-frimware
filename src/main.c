@@ -31,6 +31,7 @@ void app_main(void)
     if (mode_button_state == 1)
     {
         wifi_init_smartconfig();
+        led_init();
     }
     else
     {
