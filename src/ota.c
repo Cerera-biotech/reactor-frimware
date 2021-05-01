@@ -3,6 +3,8 @@
 #include "esp_system.h"
 #include "esp_log.h"
 #include "esp_ota_ops.h"
+#include "esp_flash_partitions.h"
+#include "esp_partition.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -85,8 +87,20 @@ void ota_server_start()
 {
     ESP_ERROR_CHECK(create_tcp_server());
 
-    const esp_partition_t *update_partition = esp_ota_get_next_update_partition(NULL);
+    const esp_partition_t *configured = esp_ota_get_boot_partition();
+    const esp_partition_t *running = esp_ota_get_running_partition();
 
+    if (configured != running)
+    {
+        ESP_LOGW(TAG, "Configured OTA boot partition at offset 0x%08x, but running from offset 0x%08x",
+                 configured->address, running->address);
+        ESP_LOGW(TAG, "(This can happen if either the OTA boot data or preferred boot image become corrupted somehow.)");
+    }
+    ESP_LOGI(TAG, "Running partition type %d subtype %d (offset 0x%08x)",
+             running->type, running->subtype, running->address);
+
+    const esp_partition_t *update_partition = esp_ota_get_next_update_partition(NULL);
+    assert(update_partition != NULL);
     ESP_LOGI(TAG, "Writing to partition subtype %d at offset 0x%x",
              update_partition->subtype, update_partition->address);
 
@@ -99,6 +113,7 @@ void ota_server_start()
     esp_ota_handle_t ota_handle;
     do
     {
+        vTaskDelay(10 / portTICK_PERIOD_MS);
         recv_len = recv(connect_socket, ota_buff, OTA_BUFF_SIZE, 0);
         if (recv_len > 0)
         {

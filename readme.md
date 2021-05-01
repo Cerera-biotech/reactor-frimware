@@ -13,7 +13,7 @@ EXAMPLE: PUT http://192.168.1.235/channels?channel=2&duty=1023
 
 ## OTA
 
-curl 192.168.1.235:1234 --data-binary "@.pio/build/lolin32/firmware.bin"
+curl 192.168.1.235:1234 --data-binary "@.pio/build/lamp/firmware.bin"
 
 ### fix for io 20
 

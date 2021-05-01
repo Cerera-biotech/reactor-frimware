@@ -94,7 +94,7 @@ void led_init(void)
     for (uint8_t ch = 0; ch < LED_CONTROL_CH_NUM; ch++)
     {
         uint32_t duty = nvs_get_ch_value(ch);
-        ESP_LOGI(LED_TAG, "setting ch %d to %d", ch, duty);
+        ESP_LOGI(LED_TAG, "initial setting ch %d to %d", ch, duty);
         if (duty)
             set_duty_with_fade_for_channel(ch, duty);
     }

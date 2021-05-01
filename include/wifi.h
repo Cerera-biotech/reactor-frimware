@@ -162,6 +162,13 @@ void wifi_init_sta(void)
     ESP_LOGI(WIFI_TAG, "SSID:%s", wifi_config.sta.ssid);
     ESP_LOGI(WIFI_TAG, "PASSWORD:%s", wifi_config.sta.password);
 
+    // if (strlen(wifi_config.sta.ssid) == 0)
+    // {
+    //     ESP_LOGW(WIFI_TAG, "no wifi credentials stored");
+    //     nvs_set_smart_config_flag(true);
+    //     esp_restart();
+    // }
+
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
