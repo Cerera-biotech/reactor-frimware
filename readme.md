@@ -21,5 +21,6 @@ At least v4.1 does not take into account that ESP32 chips can have an usable GPI
 
 ## TODO 
 
-- make it work with 10 channels 
 - implement ota via web page
+- think about conifg mode
+
