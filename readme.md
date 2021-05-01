@@ -11,3 +11,10 @@ to change the channel brightness call `PUT http://{ip}/channels?channel={channel
 
 EXAMPLE: PUT http://192.168.1.235/channels?channel=2&duty=1023
 
+
+## TODO 
+
+- implement get all channels
+- make it work with 10 channels 
+- add basic web interface
+
