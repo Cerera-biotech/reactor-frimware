@@ -17,4 +17,4 @@ EXAMPLE: PUT http://192.168.1.235/channels?channel=2&duty=1023
 - implement get all channels
 - make it work with 10 channels 
 - add basic web interface
-
+- implement ota via web page
