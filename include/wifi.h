@@ -22,6 +22,8 @@
 #include "led.h"
 #include "httpserver.h"
 
+#include "ota_server.h"
+
 /* The examples use WiFi configuration that you can set via project configuration menu
    If you'd rather not, just change the below entries to strings with
    the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
@@ -183,6 +185,7 @@ void wifi_init_sta(void)
 
         led_init();
         start_webserver();
+        ota_server_start();
     }
 
     else if (bits & ESPTOUCH_DONE_BIT)
