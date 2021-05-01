@@ -2,58 +2,81 @@
 #include <sys/param.h>
 #include "led.h"
 #include "nvs.h"
+#include "cJSON.h"
+
+extern const uint8_t index_html_start[] asm("_binary_index_html_start");
+extern const uint8_t index_html_end[] asm("_binary_index_html_end");
+const static char http_200_hdr[] = "200 OK";
+const static char http_content_type_html[] = "text/html";
+const static char http_content_type_json[] = "application/json";
 
 /* @brief tag used for ESP serial console messages */
 static const char HTTP_TAG[] = "HTTP_SERVER";
 
+// Create array
+cJSON *Create_array_of_anything(cJSON **objects, int array_num)
+{
+    cJSON *prev = 0;
+    cJSON *root;
+    root = cJSON_CreateArray();
+    for (int i = 0; i < array_num; i++)
+    {
+        if (!i)
+        {
+            root->child = objects[i];
+        }
+        else
+        {
+            prev->next = objects[i];
+            objects[i]->prev = prev;
+        }
+        prev = objects[i];
+    }
+    return root;
+}
+
 /* Our URI handler function to be called during GET /uri request */
 esp_err_t get_handler(httpd_req_t *req)
 {
-    /* Send a simple response */
-    const char resp[] = "URI GET Response";
-    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+    cJSON *objects[LED_CONTROL_CH_NUM];
+    for (int i = 0; i < LED_CONTROL_CH_NUM; i++)
+    {
+        objects[i] = cJSON_CreateObject();
+    }
+
+    cJSON *root;
+    root = Create_array_of_anything(objects, LED_CONTROL_CH_NUM);
+    esp_chip_info_t chip_info;
+    esp_chip_info(&chip_info);
+
+    for (int i = 0; i < LED_CONTROL_CH_NUM; i++)
+    {
+        uint32_t duty = led_get_duty_of_channel(i);
+        ESP_LOGI(HTTP_TAG, "ch %d duty %d", i, duty);
+        cJSON_AddNumberToObject(objects[i], "duty", duty);
+    }
+
+    const char *my_json_string = cJSON_Print(root);
+    ESP_LOGI(HTTP_TAG, "my_json_string\n%s", my_json_string);
+    cJSON_Delete(root);
+
+    httpd_resp_set_status(req, http_200_hdr);
+    httpd_resp_set_type(req, http_content_type_json);
+    httpd_resp_send(req, my_json_string, HTTPD_RESP_USE_STRLEN);
     return ESP_OK;
 }
-
 
 /* Our URI handler function to be called during GET /uri request */
 esp_err_t get_root_handler(httpd_req_t *req)
 {
-    /* Send a simple response */
-    const char resp[] = "URI GET Response";
-    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+    httpd_resp_set_status(req, http_200_hdr);
+    httpd_resp_set_type(req, http_content_type_html);
+    httpd_resp_send(req, (char *)index_html_start, index_html_end - index_html_start);
     return ESP_OK;
 }
 
-/* Our URI handler function to be called during POST /uri request */
 esp_err_t put_handler(httpd_req_t *req)
 {
-    /* Destination buffer for content of HTTP POST request.
-     * httpd_req_recv() accepts char* only, but content could
-     * as well be any binary data (needs type casting).
-     * In case of string data, null termination will be absent, and
-     * content length would give length of string */
-    // char content[250];
-
-    // /* Truncate if content length larger than the buffer */
-    // size_t recv_size = MIN(req->content_len, sizeof(content));
-
-    // int ret = httpd_req_recv(req, content, recv_size);
-    // if (ret <= 0)
-    // { /* 0 return value indicates connection closed */
-    //     /* Check if timeout occurred */
-    //     if (ret == HTTPD_SOCK_ERR_TIMEOUT)
-    //     {
-    //         /* In case of timeout one can choose to retry calling
-    //          * httpd_req_recv(), but to keep it simple, here we
-    //          * respond with an HTTP 408 (Request Timeout) error */
-    //         httpd_resp_send_408(req);
-    //     }
-    //     /* In case of error, returning ESP_FAIL will
-    //      * ensure that the underlying socket is closed */
-    //     return ESP_FAIL;
-    // }
-
     uint8_t channel;
     uint32_t duty;
 
@@ -106,7 +129,7 @@ httpd_uri_t uri_get = {
     .handler = get_handler,
     .user_ctx = NULL};
 
-    /* URI handler structure for GET /uri */
+/* URI handler structure for GET /uri */
 httpd_uri_t uri_get_root = {
     .uri = "/",
     .method = HTTP_GET,
@@ -135,7 +158,6 @@ void start_webserver(void)
         httpd_register_uri_handler(server, &uri_get);
         httpd_register_uri_handler(server, &uri_post);
         httpd_register_uri_handler(server, &uri_get_root);
-        
     }
 }
 

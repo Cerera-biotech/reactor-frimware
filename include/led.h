@@ -4,9 +4,8 @@
 #include "pin_config.h"
 #include "nvs.h"
 
-#define LEDC_TEST_CH_NUM (10)
-#define LEDC_TEST_DUTY (4000)
-#define LEDC_TEST_FADE_TIME (3000)
+#define LED_CONTROL_CH_NUM (5)
+#define LED_CONTROL_FADE_TIME (3000)
 
 static const char LED_TAG[] = "led";
 
@@ -23,7 +22,7 @@ static const char LED_TAG[] = "led";
      *         then frequency and bit_num of these channels
      *         will be the same
      */
-ledc_channel_config_t ledc_channel[LEDC_TEST_CH_NUM] = {
+ledc_channel_config_t ledc_channel[LED_CONTROL_CH_NUM] = {
     {.channel = LEDC_CHANNEL_0,
      .duty = 0,
      .gpio_num = GPIO_LED_CH0,
@@ -86,6 +85,11 @@ ledc_channel_config_t ledc_channel[LEDC_TEST_CH_NUM] = {
      .hpoint = 0,
      .timer_sel = LEDC_TIMER_3}};
 
+uint32_t led_get_duty_of_channel(uint8_t ch)
+{
+    return ledc_get_duty(ledc_channel[ch].speed_mode, ledc_channel[ch].channel);
+}
+
 void set_duty_with_fade_for_channel(uint8_t ch, uint32_t target_duty)
 {
     if (target_duty > 1023)
@@ -93,7 +97,7 @@ void set_duty_with_fade_for_channel(uint8_t ch, uint32_t target_duty)
         target_duty = 1023; // bacause the resolution of the timer is 8
     }
     ledc_set_fade_with_time(ledc_channel[ch].speed_mode,
-                            ledc_channel[ch].channel, target_duty, LEDC_TEST_FADE_TIME);
+                            ledc_channel[ch].channel, target_duty, LED_CONTROL_FADE_TIME);
     ledc_fade_start(ledc_channel[ch].speed_mode,
                     ledc_channel[ch].channel, LEDC_FADE_NO_WAIT);
 }
@@ -130,7 +134,7 @@ void led_init(void)
     ledc_timer_config(&timer_config);
 
     // Set LED Controller with previously prepared configuration
-    for (uint8_t ch = 0; ch < LEDC_TEST_CH_NUM; ch++)
+    for (uint8_t ch = 0; ch < LED_CONTROL_CH_NUM; ch++)
     {
         ESP_LOGI(LED_TAG, "configuring %d cahnnel %d on gpio %d ledc: %d", ledc_channel[ch].speed_mode, ch, ledc_channel[ch].gpio_num, ledc_channel[ch].channel);
         ledc_channel_config(&ledc_channel[ch]);
@@ -141,7 +145,7 @@ void led_init(void)
     ledc_fade_func_install(0);
 
     // Set LED Controller with previously prepared configuration
-    for (uint8_t ch = 0; ch < LEDC_TEST_CH_NUM; ch++)
+    for (uint8_t ch = 0; ch < LED_CONTROL_CH_NUM; ch++)
     {
         uint32_t duty = nvs_get_ch_value(ch);
         set_duty_with_fade_for_channel(ch, duty);

@@ -28,10 +28,11 @@ void app_main(void)
     nvs_init();
     int mode_button_state = read_mode_button();
     ESP_LOGI(TAG, "mode button state %d\n", mode_button_state);
+
+    // led_init();
     if (mode_button_state == 1)
     {
         wifi_init_smartconfig();
-        led_init();
     }
     else
     {

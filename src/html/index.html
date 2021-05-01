@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .slidecontainer {
+            width: 100%;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 25px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        .slider:hover {
+            opacity: 1;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            background: #04AA6D;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            background: #04AA6D;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Cerera lamp</h1>
+    <div id="list">
+    </div>
+</body>
+
+
+<script>
+    function httpReq(method, theUrl) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open(method, theUrl, false); // false for synchronous request
+        xmlHttp.send(null);
+        return xmlHttp.responseText;
+    }
+
+    let channelsData = JSON.parse(httpReq("GET", `/channels`));
+
+    for (let i = 0; i < channelsData.length; i++) {
+        var list_div = document.getElementById("list");
+
+        var root_div = document.createElement("div");
+        root_div.className = "slidecontainer"
+
+        let p = document.createElement("p")
+        p.appendChild(document.createTextNode(`channel ${i + 1}`))
+
+        let percent = channelsData[i].duty; //get it from board with html request
+        // value_div.appendChild(document.createTextNode(`${percent} %`))
+
+        let input = document.createElement("input");
+        input.type = "range";
+        input.min = "0";
+        input.max = "1023";
+        input.value = percent;
+        input.className = "slider";
+        input.id = `channel-${i + 1}`;
+        input.onchange = function (e) {
+            httpReq("PUT", `/channels?channel=${i}&duty=${e.target.value}`)
+        }
+
+        root_div.appendChild(p);
+        root_div.appendChild(input);
+        list_div.appendChild(root_div);
+    }
+</script>
+
+</html>
