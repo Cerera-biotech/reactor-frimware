@@ -192,6 +192,7 @@ void wifi_init_sta(void)
     {
         ESP_LOGI(WIFI_TAG, "Failed to connect to SSID:%s, password:%s",
                  wifi_config.sta.ssid, wifi_config.sta.password);
+        nvs_set_smart_config_flag(true);
     }
     else
     {

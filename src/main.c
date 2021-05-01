@@ -20,18 +20,18 @@
 #include "wifi.h"
 #include "nvs.h"
 
-static const char *TAG = "main";
+// static const char *TAG = "main";
 
 //todo store wifi to smartconfig after successful configuration
 void app_main(void)
 {
     nvs_init();
-    int mode_button_state = read_mode_button();
-    ESP_LOGI(TAG, "mode button state %d\n", mode_button_state);
+    // int mode_button_state = read_mode_button();
+    // ESP_LOGI(TAG, "mode button state %d\n", mode_button_state);
 
-    // led_init();
-    if (mode_button_state == 1)
+    if (nvs_get_smart_config_flag())
     {
+        nvs_set_smart_config_flag(false);
         wifi_init_smartconfig();
     }
     else

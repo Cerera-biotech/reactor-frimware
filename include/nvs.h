@@ -34,58 +34,9 @@ void nvs_init()
 }
 
 //todo add errors reporting here
-void nvs_get_ssid(char *ssid, size_t *len)
+bool nvs_get_smart_config_flag()
 {
-    ESP_LOGI(NVS_TAG, "trying to get ssid from nvs");
-    nvs_handle_t my_handle;
-    esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
-    if (err != ESP_OK)
-    {
-        ESP_LOGE(NVS_TAG, "Error (%s) opening NVS handle!\n", esp_err_to_name(err));
-    }
-    else
-    {
-        ESP_LOGI(NVS_TAG, "reading");
-        err = nvs_get_str(my_handle, "ssid", ssid, len);
-        hanlde_nvs_err(err);
-        // Close
-        nvs_close(my_handle);
-    }
-}
-
-//todo add errors reporting here
-void nvs_set_ssid(const char *ssid)
-{
-
-    ESP_LOGI(NVS_TAG, "trying to set ssid from nvs");
-    nvs_handle_t my_handle;
-    esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
-    if (err != ESP_OK)
-    {
-        ESP_LOGE(NVS_TAG, "Error (%s) opening NVS handle!\n", esp_err_to_name(err));
-    }
-    else
-    {
-        ESP_LOGI(NVS_TAG, "trying to write ssid to nvs");
-        err = nvs_set_str(my_handle, "ssid", ssid);
-        printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
-
-        // Commit written value.
-        // After setting any values, nvs_commit() must be called to ensure changes are written
-        // to flash storage. Implementations may write to storage at other times,
-        // but this is not guaranteed.
-        ESP_LOGI(NVS_TAG, "Committing updates in NVS ... ");
-        err = nvs_commit(my_handle);
-        printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
-
-        // Close
-        nvs_close(my_handle);
-    }
-}
-
-//todo add errors reporting here
-void nvs_get_pwd(char *pwd, size_t *len)
-{
+    bool value;
     // Open
     ESP_LOGI(NVS_TAG, "Opening Non-Volatile Storage (NVS) handle... ");
     nvs_handle_t my_handle;
@@ -96,19 +47,18 @@ void nvs_get_pwd(char *pwd, size_t *len)
     }
     else
     {
-
-        ESP_LOGI(NVS_TAG, "trying to read ssid from nvs");
-        err = nvs_get_str(my_handle, "pwd", pwd, len);
+        err = nvs_get_i8(my_handle, "smart_config", &value);
         hanlde_nvs_err(err);
         // Close
         nvs_close(my_handle);
     }
+    return value;
 }
 
 //todo add errors reporting here
-void nvs_set_pwd(const char *pwd)
+void nvs_set_smart_config_flag(bool value)
 {
-    // Open
+
     ESP_LOGI(NVS_TAG, "Opening Non-Volatile Storage (NVS) handle... ");
     nvs_handle_t my_handle;
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
@@ -118,9 +68,7 @@ void nvs_set_pwd(const char *pwd)
     }
     else
     {
-
-        ESP_LOGI(NVS_TAG, "trying to write pwd to nvs");
-        err = nvs_set_str(my_handle, "pwd", pwd);
+        err = nvs_set_i8(my_handle, "smart_config", value);
         printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
         // Commit written value.
@@ -143,7 +91,7 @@ uint32_t nvs_get_ch_value(uint8_t ch)
     sprintf(key, "ch_%d", ch);
     uint32_t value = 0;
     // Open
-    ESP_LOGE(NVS_TAG, "Opening Non-Volatile Storage (NVS) handle... ");
+    ESP_LOGI(NVS_TAG, "Opening Non-Volatile Storage (NVS) handle... ");
     nvs_handle_t my_handle;
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
     if (err != ESP_OK)
@@ -152,7 +100,7 @@ uint32_t nvs_get_ch_value(uint8_t ch)
     }
     else
     {
-        ESP_LOGE(NVS_TAG, "reading ch %s value", key);
+        ESP_LOGI(NVS_TAG, "reading ch %s value", key);
         err = nvs_get_u32(my_handle, key, &value);
         hanlde_nvs_err(err);
         // Close
@@ -167,7 +115,7 @@ void nvs_set_ch_value(uint8_t ch, uint32_t value)
     char key[10];
     sprintf(key, "ch_%d", ch);
     // Open
-    ESP_LOGE(NVS_TAG, "Opening Non-Volatile Storage (NVS) handle... ");
+    ESP_LOGI(NVS_TAG, "Opening Non-Volatile Storage (NVS) handle... ");
     nvs_handle_t my_handle;
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
     if (err != ESP_OK)
@@ -176,7 +124,7 @@ void nvs_set_ch_value(uint8_t ch, uint32_t value)
     }
     else
     {
-        ESP_LOGI(NVS_TAG, "trying to write ch %s value to nvs", key);
+        ESP_LOGI(NVS_TAG, "trying to write ch %s value %d to nvs", key, value);
         err = nvs_set_u32(my_handle, key, value);
         printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
