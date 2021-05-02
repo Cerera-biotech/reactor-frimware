@@ -29,6 +29,19 @@ void set_duty_with_fade_for_channel(uint8_t ch, uint32_t target_duty)
                     ledc_channel[ch].channel, LEDC_FADE_NO_WAIT);
 }
 
+void set_duty_with_fast_fade_blocking(uint8_t ch, uint32_t target_duty)
+{
+    if (target_duty > 1023)
+    {
+        target_duty = 1023; // bacause the resolution of the timer is 8
+    }
+    ESP_LOGI(LED_TAG, "fast fade setting ch %d to %d", ch, target_duty);
+    ledc_set_fade_with_time(ledc_channel[ch].speed_mode,
+                            ledc_channel[ch].channel, target_duty, 500);
+    ledc_fade_start(ledc_channel[ch].speed_mode,
+                    ledc_channel[ch].channel, LEDC_FADE_WAIT_DONE);
+}
+
 void led_setup_channel(uint8_t chan, uint8_t gpio)
 {
     if (chan > LED_CONTROL_CH_NUM)

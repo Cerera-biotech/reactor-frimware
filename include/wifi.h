@@ -203,8 +203,20 @@ void wifi_init_sta(void)
     vEventGroupDelete(s_wifi_event_group);
 }
 
+void smart_config_indication_task()
+{
+    ESP_LOGI(WIFI_TAG, "started indication task");
+    for (int i = 0; i < 100; i++)
+    {
+        set_duty_with_fast_fade_blocking(0, 1023);
+        set_duty_with_fast_fade_blocking(0, 0);
+    }
+    vTaskDelete(NULL);
+}
+
 static void wifi_init_smartconfig(void)
 {
+    xTaskCreate(smart_config_indication_task, "smart_config_indication_task", 4096, NULL, 10, NULL);
     ESP_ERROR_CHECK(esp_netif_init());
     s_wifi_event_group = xEventGroupCreate();
     ESP_ERROR_CHECK(esp_event_loop_create_default());
