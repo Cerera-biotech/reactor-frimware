@@ -12,6 +12,8 @@
         "type_traits": "cpp",
         "utility": "cpp",
         "esp_smartconfig.h": "c",
-        "esp_event.h": "c"
+        "esp_event.h": "c",
+        "nvs.h": "c",
+        "esp_log.h": "c"
     }
 }

@@ -1,6 +1,5 @@
 #pragma once
 #include "nvs_flash.h"
-#include "nvs.h"
 
 static const char *NVS_TAG = "nvs";
 
@@ -34,9 +33,9 @@ void nvs_init()
 }
 
 //todo add errors reporting here
-bool nvs_get_smart_config_flag()
+uint8_t nvs_get_smart_config_counter()
 {
-    bool value;
+    uint8_t value;
     // Open
     ESP_LOGI(NVS_TAG, "Opening Non-Volatile Storage (NVS) handle... ");
     nvs_handle_t my_handle;
@@ -47,7 +46,7 @@ bool nvs_get_smart_config_flag()
     }
     else
     {
-        err = nvs_get_i8(my_handle, "smart_config", &value);
+        err = nvs_get_u8(my_handle, "smart_config", &value);
         hanlde_nvs_err(err);
         // Close
         nvs_close(my_handle);
@@ -56,7 +55,7 @@ bool nvs_get_smart_config_flag()
 }
 
 //todo add errors reporting here
-void nvs_set_smart_config_flag(bool value)
+void nvs_set_smart_config_counter(uint8_t value)
 {
 
     ESP_LOGI(NVS_TAG, "Opening Non-Volatile Storage (NVS) handle... ");
@@ -68,7 +67,7 @@ void nvs_set_smart_config_flag(bool value)
     }
     else
     {
-        err = nvs_set_i8(my_handle, "smart_config", value);
+        err = nvs_set_u8(my_handle, "smart_config", value);
         printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
         // Commit written value.

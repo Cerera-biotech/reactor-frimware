@@ -21,6 +21,6 @@ At least v4.1 does not take into account that ESP32 chips can have an usable GPI
 
 ## TODO 
 
-- implement ota via web page
+- implement ota 
 - think about conifg mode
 
