@@ -57,7 +57,7 @@ esp_err_t get_handler(httpd_req_t *req)
     }
 
     const char *my_json_string = cJSON_Print(root);
-    ESP_LOGI(HTTP_TAG, "my_json_string\n%s", my_json_string);
+    // ESP_LOGI(HTTP_TAG, "my_json_string\n%s", my_json_string);
     cJSON_Delete(root);
 
     httpd_resp_set_status(req, http_200_hdr);
