@@ -208,7 +208,7 @@ void smart_config_indication_task()
     ESP_LOGI(WIFI_TAG, "started indication task");
     for (int i = 0; i < 100; i++)
     {
-        set_duty_with_fast_fade_blocking(0, 1023);
+        set_duty_with_fast_fade_blocking(0, 200);
         set_duty_with_fast_fade_blocking(0, 0);
     }
     vTaskDelete(NULL);
