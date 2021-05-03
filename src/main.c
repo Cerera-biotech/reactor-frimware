@@ -16,7 +16,6 @@
 #include "esp_log.h"
 #include "esp_system.h"
 #include "nvs_flash.h"
-#include "button.h"
 #include "wifi.h"
 #include "nvs.h"
 #include "init_config.h"
