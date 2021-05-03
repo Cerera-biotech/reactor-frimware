@@ -31,8 +31,6 @@ void app_main(void)
     bool smartconfig = increment_smart_config_counter();
 
     led_init();
-    test_leds();
-    set_leds_from_nvs();
 
     init_smart_config_counter_task();
     if (smartconfig)
@@ -41,6 +39,8 @@ void app_main(void)
     }
     else
     {
+        test_leds();
+        set_leds_from_nvs();
         wifi_init_sta();
     }
 }
