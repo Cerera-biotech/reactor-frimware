@@ -28,10 +28,14 @@ void app_main(void)
 {
     print_welcome();
     nvs_init();
+    bool smartconfig = increment_smart_config_counter();
+
     led_init();
+    test_leds();
+    set_leds_from_nvs();
 
     init_smart_config_counter_task();
-    if (increment_smart_config_counter())
+    if (smartconfig)
     {
         wifi_init_smartconfig();
     }

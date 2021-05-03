@@ -42,6 +42,18 @@ void set_duty_with_fast_fade_blocking(uint8_t ch, uint32_t target_duty)
                     ledc_channel[ch].channel, LEDC_FADE_WAIT_DONE);
 }
 
+void test_leds()
+{
+    for (uint8_t ch = 0; ch < LED_CONTROL_CH_NUM; ch++)
+    {
+        ESP_LOGI(LED_TAG, "testing %d cahnnel, duty 100%%", ch);
+        set_duty_with_fast_fade_blocking(ch, 1023);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+        set_duty_with_fast_fade_blocking(ch, 0);
+        ESP_LOGI(LED_TAG, "testing %d cahnnel done", ch);
+    }
+}
+
 void led_setup_channel(uint8_t chan, uint8_t gpio)
 {
     if (chan > LED_CONTROL_CH_NUM)
@@ -102,7 +114,10 @@ void led_init(void)
 
     // Initialize fade service.
     ledc_fade_func_install(0);
+}
 
+void set_leds_from_nvs()
+{
     // Set LED Controller with previously prepared configuration
     for (uint8_t ch = 0; ch < LED_CONTROL_CH_NUM; ch++)
     {

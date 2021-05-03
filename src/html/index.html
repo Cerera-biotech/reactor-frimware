@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <style>
-        .slidecontainer {
+        #list {
             width: 100%;
         }
 
@@ -39,6 +39,33 @@
             background: #04AA6D;
             cursor: pointer;
         }
+
+
+        .slider_value {
+            display: inline-block;
+            position: relative;
+            width: 3em;
+            /* color: white; */
+            line-height: 20px;
+            text-align: center;
+            border-radius: 3px;
+            background: 04AA6D;
+            padding: 5px 10px;
+            margin-left: 8px;
+        }
+
+        .slider_value {
+            width: 6%;
+        }
+
+        .channel_row {
+            width: 6%;
+        }
+
+        .slider_row {
+            width: 88%;
+        }
+
     </style>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
@@ -46,8 +73,8 @@
 <body>
 
     <h1>Cerera lamp</h1>
-    <div id="list">
-    </div>
+    <table id="list">
+    </table>
 </body>
 
 
@@ -62,17 +89,24 @@
     let channelsData = JSON.parse(httpReq("GET", `/channels`));
 
     for (let i = 0; i < channelsData.length; i++) {
-        var list_div = document.getElementById("list");
+        var table = document.getElementById("list");
 
-        var root_div = document.createElement("div");
-        root_div.className = "slidecontainer"
+        var tr = document.createElement("tr");
+        tr.className = "slidecontainer"
 
-        let p = document.createElement("p")
-        p.appendChild(document.createTextNode(`channel ${i + 1}`))
+        let td1 = document.createElement("td")
+        td1.className = "channel_row"
+        td1.appendChild(document.createTextNode(`channel ${i + 1}`))
 
         let percent = channelsData[i].duty; //get it from board with html request
-        // value_div.appendChild(document.createTextNode(`${percent} %`))
 
+        let td3 = document.createElement("td")
+        td3.className = "slider_value";
+        td3.appendChild(document.createTextNode(percent))
+
+
+        let td2 = document.createElement("td")
+        td2.className = "slider_row"
         let input = document.createElement("input");
         input.type = "range";
         input.min = "0";
@@ -82,11 +116,15 @@
         input.id = `channel-${i + 1}`;
         input.onchange = function (e) {
             httpReq("PUT", `/channels?channel=${i}&duty=${e.target.value}`)
+            td3.textContent = e.target.value
         }
 
-        root_div.appendChild(p);
-        root_div.appendChild(input);
-        list_div.appendChild(root_div);
+        td2.appendChild(input)
+     
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tr.appendChild(td3);
+        table.appendChild(tr);
     }
 </script>
 

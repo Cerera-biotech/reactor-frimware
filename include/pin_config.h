@@ -1,3 +1,4 @@
+// esp 32 pico v3
 #define GPIO_LED_CH0 22
 #define GPIO_LED_CH1 21
 #define GPIO_LED_CH2 5
@@ -9,6 +10,7 @@
 #define GPIO_LED_CH8 32
 #define GPIO_LED_CH9 33
 
+// //esp32 wroom config
 // #define GPIO_LED_CH0 13
 // #define GPIO_LED_CH1 12
 // #define GPIO_LED_CH2 27
