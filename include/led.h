@@ -35,7 +35,7 @@ void set_duty_with_fast_fade_blocking(uint8_t ch, uint32_t target_duty)
     {
         target_duty = 1023; // bacause the resolution of the timer is 8
     }
-    ESP_LOGI(LED_TAG, "fast fade setting ch %d to %d", ch, target_duty);
+    ESP_LOGD(LED_TAG, "fast fade setting ch %d to %d", ch, target_duty);
     ledc_set_fade_with_time(ledc_channel[ch].speed_mode,
                             ledc_channel[ch].channel, target_duty, 500);
     ledc_fade_start(ledc_channel[ch].speed_mode,
@@ -48,7 +48,7 @@ void test_leds()
     {
         ESP_LOGI(LED_TAG, "testing %d cahnnel, duty 100%%", ch);
         set_duty_with_fast_fade_blocking(ch, 1023);
-        vTaskDelay(500 / portTICK_PERIOD_MS);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
         set_duty_with_fast_fade_blocking(ch, 0);
         ESP_LOGI(LED_TAG, "testing %d cahnnel done", ch);
     }

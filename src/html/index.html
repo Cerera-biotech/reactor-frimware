@@ -114,9 +114,11 @@
         input.value = percent;
         input.className = "slider";
         input.id = `channel-${i + 1}`;
+        input.oninput = function (e) {
+            td3.textContent = e.target.value
+        }
         input.onchange = function (e) {
             httpReq("PUT", `/channels?channel=${i}&duty=${e.target.value}`)
-            td3.textContent = e.target.value
         }
 
         td2.appendChild(input)

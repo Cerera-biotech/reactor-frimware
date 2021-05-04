@@ -13,7 +13,11 @@ EXAMPLE: PUT http://192.168.1.235/channels?channel=2&duty=1023
 
 ## OTA
 
-curl 192.168.1.235:1234 --data-binary "@.pio/build/lamp/firmware.bin"
+`curl 192.168.1.235:1234 --data-binary "@.pio/build/lamp/firmware.bin"`
+
+## dump flashing image
+
+`esptool --baud 460800 read_flash 0x0 0x400000 ./test.bin`
 
 ### fix for io 20
 
