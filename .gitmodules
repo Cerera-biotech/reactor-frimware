@@ -1,0 +1,3 @@
+[submodule "components/espidflib"]
+	path = components/espidflib
+	url = https://github.com/UncleRus/esp-idf-lib.git

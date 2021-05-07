@@ -23,9 +23,12 @@ EXAMPLE: PUT http://192.168.1.235/channels?channel=2&duty=1023
 
 At least v4.1 does not take into account that ESP32 chips can have an usable GPIO20 yet. We'll see if we can add/backport this. For now, you may be able to make this change to make it work: in esp-idf/components/soc/soc/esp32/gpio_periph.c, search for 'IO_MUX_GPIO19_REG' and change the line under it from '0,'to 'IO_MUX_GPIO20_REG,'. 
 
+
+## references 
+ project uses https://github.com/UncleRus/esp-idf-lib.git
+ 
 ## TODO 
 
-- implement ota 
 - think about conifg mode
 - enter config mode if there is not wifi config.
 - blink until config received.

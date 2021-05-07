@@ -20,6 +20,7 @@
 #include "nvs.h"
 #include "init_config.h"
 #include "version.h"
+#include <ads111x.h>
 
 // static const char *TAG = "main";
 
