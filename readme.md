@@ -27,4 +27,5 @@ At least v4.1 does not take into account that ESP32 chips can have an usable GPI
 
 - implement ota 
 - think about conifg mode
-
+- enter config mode if there is not wifi config.
+- blink until config received.
