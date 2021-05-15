@@ -83,7 +83,7 @@ static esp_err_t create_tcp_server()
     return ESP_OK;
 }
 
-void ota_server_start()
+void ota_server_task(void *pvParameters)
 {
     ESP_ERROR_CHECK(create_tcp_server());
 
@@ -165,4 +165,10 @@ void ota_server_start()
              boot_partition->subtype, boot_partition->address);
     ESP_LOGI(TAG, "Prepare to restart system!");
     esp_restart();
+}
+
+void ota_server_start()
+{
+    xTaskCreate(ota_server_task, "ota_server", 5000, (void *)AF_INET, 8, NULL);
+    ESP_LOGI(TAG, "ota server started");
 }

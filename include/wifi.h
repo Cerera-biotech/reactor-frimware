@@ -21,6 +21,7 @@
 #include "nvs.h"
 #include "led.h"
 #include "httpserver.h"
+#include "udp_server.h"
 
 #include "ota.h"
 
@@ -183,7 +184,8 @@ void wifi_init_sta(void)
         ESP_LOGI(WIFI_TAG, "connected to ap SSID:%s password:%s",
                  wifi_config.sta.ssid, wifi_config.sta.password);
 
-        start_webserver();
+        start_webserver();        
+        udp_server_start();
         ota_server_start();
     }
 
