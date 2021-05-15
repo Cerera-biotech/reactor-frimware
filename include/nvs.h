@@ -139,3 +139,106 @@ void nvs_set_ch_value(uint8_t ch, uint32_t value)
         nvs_close(my_handle);
     }
 }
+
+void nvs_set_mqtt_pass(char *pass)
+{
+    // Open
+    ESP_LOGI(NVS_TAG, "Opening Non-Volatile Storage (NVS) handle... ");
+    nvs_handle_t my_handle;
+    esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(NVS_TAG, "Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+    }
+    else
+    {
+        ESP_LOGI(NVS_TAG, "trying  mqtt pass value %s to nvs", pass);
+        err = nvs_set_str(my_handle, "mqtt_pass", pass);
+        printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+
+        // Commit written value.
+        // After setting any values, nvs_commit() must be called to ensure changes are written
+        // to flash storage. Implementations may write to storage at other times,
+        // but this is not guaranteed.
+        ESP_LOGI(NVS_TAG, "Committing updates in NVS ... ");
+        err = nvs_commit(my_handle);
+        printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+
+        // Close
+        nvs_close(my_handle);
+    }
+}
+
+void nvs_get_mqtt_pass(char *pass)
+{
+    // Open
+    ESP_LOGI(NVS_TAG, "Opening Non-Volatile Storage (NVS) handle... ");
+    nvs_handle_t my_handle;
+    esp_err_t err = nvs_open("storage", NVS_READONLY, &my_handle);
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(NVS_TAG, "Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+    }
+    else
+    {
+        ESP_LOGI(NVS_TAG, "reading mqtt pass value");
+        size_t size;
+        err = nvs_get_str(my_handle, "mqtt_pass", pass, &size);
+        hanlde_nvs_err(err);
+        // Close
+        nvs_close(my_handle);
+    }
+}
+
+
+
+void nvs_set_mqtt_ip(char *ip)
+{
+    // Open
+    ESP_LOGI(NVS_TAG, "Opening Non-Volatile Storage (NVS) handle... ");
+    nvs_handle_t my_handle;
+    esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(NVS_TAG, "Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+    }
+    else
+    {
+        ESP_LOGI(NVS_TAG, "trying  mqtt ip value %s to nvs", ip);
+        err = nvs_set_str(my_handle, "mqtt_ip", ip);
+        printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+
+        // Commit written value.
+        // After setting any values, nvs_commit() must be called to ensure changes are written
+        // to flash storage. Implementations may write to storage at other times,
+        // but this is not guaranteed.
+        ESP_LOGI(NVS_TAG, "Committing updates in NVS ... ");
+        err = nvs_commit(my_handle);
+        printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+
+        // Close
+        nvs_close(my_handle);
+    }
+}
+
+void nvs_get_mqtt_ip(char *ip)
+{
+    // Open
+    ESP_LOGI(NVS_TAG, "Opening Non-Volatile Storage (NVS) handle... ");
+    nvs_handle_t my_handle;
+    esp_err_t err = nvs_open("storage", NVS_READONLY, &my_handle);
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(NVS_TAG, "Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+    }
+    else
+    {
+        ESP_LOGI(NVS_TAG, "reading mqtt pass value");
+        size_t size;
+        err = nvs_get_str(my_handle, "mqtt_ip", ip, &size);
+        hanlde_nvs_err(err);
+        // Close
+        nvs_close(my_handle);
+    }
+}
+// todo fix readwrite

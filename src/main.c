@@ -22,7 +22,7 @@
 #include "version.h"
 // #include <ads111x.h>
 
-// static const char *TAG = "main";
+static const char *TAG = "main";
 
 //todo store wifi to smartconfig after successful configuration
 void app_main(void)
@@ -40,6 +40,16 @@ void app_main(void)
     }
     else
     {
+        char *pass = malloc(32);
+        nvs_get_mqtt_pass(pass);
+        ESP_LOGI(TAG, "got password `%s`", pass);
+        free(pass);
+
+        char *ip = malloc(32);
+        nvs_get_mqtt_ip(ip);
+        ESP_LOGI(TAG, "got ip `%s`", ip);
+        free(ip);
+
         test_leds();
         set_leds_from_nvs();
         wifi_init_sta();

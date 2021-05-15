@@ -27,6 +27,7 @@
 #include "lwip/sockets.h"
 #include <lwip/netdb.h>
 #include "device_id.h"
+#include "nvs.h"
 
 const char *udpTAG = "UDP_SRV";
 
@@ -166,12 +167,11 @@ static void udp_server_task(void *pvParameters)
                             break;
                         }
                         i++;
-                        token = strtok(NULL, " ");
+                        token = strtok(NULL, "|");
                     }
 
                     if (strcmp(directive, "connect") == 0)
                     {
-
                         ESP_LOGI(udpTAG, "got the connect directive");
                         if (device_id == NULL)
                         {
@@ -183,7 +183,7 @@ static void udp_server_task(void *pvParameters)
                             ESP_LOGE(udpTAG, "wrong device_id provided: `%s`; expected `%s`", device_id, device_id_to_send);
                             goto finish;
                         }
-                        if (password != NULL)
+                        if (password == NULL)
                         {
                             ESP_LOGE(udpTAG, "no password provided");
                             goto finish;
@@ -191,8 +191,8 @@ static void udp_server_task(void *pvParameters)
 
                         ESP_LOGI(udpTAG, "directive verified");
                         ESP_LOGI(udpTAG, "IP: `%s`, password: `%s`", addr_str, password);
-                        // todo store the password and ip of the server to nvs
-                        // todo implement the connection process
+                        nvs_set_mqtt_pass(password);
+                        nvs_set_mqtt_ip(addr_str);
                     }
                     else
                     {
