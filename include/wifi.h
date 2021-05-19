@@ -24,6 +24,7 @@
 #include "udp_server.h"
 
 #include "ota.h"
+#include "mqtt.h"
 
 /* The examples use WiFi configuration that you can set via project configuration menu
    If you'd rather not, just change the below entries to strings with
@@ -184,9 +185,10 @@ void wifi_init_sta(void)
         ESP_LOGI(WIFI_TAG, "connected to ap SSID:%s password:%s",
                  wifi_config.sta.ssid, wifi_config.sta.password);
 
-        start_webserver();        
+        start_webserver();
         udp_server_start();
         ota_server_start();
+        mqtt_client_start();
     }
 
     else if (bits & ESPTOUCH_DONE_BIT)
