@@ -20,6 +20,7 @@
 #include "nvs.h"
 #include "init_config.h"
 #include "version.h"
+#include "adc.h"
 // #include <ads111x.h>
 
 static const char *TAG = "main";
@@ -32,6 +33,7 @@ void app_main(void)
     bool smartconfig = increment_smart_config_counter();
 
     led_init();
+    start_measuring();
 
     init_smart_config_counter_task();
     if (smartconfig)

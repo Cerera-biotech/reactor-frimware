@@ -17,6 +17,9 @@
         "esp_log.h": "c",
         "*.tcc": "cpp",
         "string": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "esp_idf_lib_helpers.h": "c",
+        "ads111x.h": "c",
+        "i2cdev.h": "c"
     }
 }
