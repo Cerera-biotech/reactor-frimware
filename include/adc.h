@@ -21,24 +21,25 @@ static float gain_val;
 
 i2c_dev_t device;
 
-static void measure(uint8_t ch)
+static void measure(uint8_t ch, uint8_t ch_to_log)
 {
+    
+    ESP_ERROR_CHECK(ads111x_set_input_mux(&device, ch));
     // wait for conversion end
     bool busy;
     do
     {
         ads111x_is_busy(&device, &busy);
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-        printf("ADC busy\n");
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+        // printf("ADC busy\n");
     } while (busy);
 
-    ESP_ERROR_CHECK(ads111x_set_input_mux(&device, ch));
     // Read result
     int16_t raw = 0;
     if (ads111x_get_value(&device, &raw) == ESP_OK)
     {
         float voltage = gain_val / ADS111X_MAX_VALUE * raw;
-        printf("Raw ADC value: %d, voltage: %.04f volts\n", raw, voltage);
+        printf("Raw ADC ch%d value: %d, voltage: %.04f volts\n",ch_to_log, raw, voltage);
     }
     else
         printf("Cannot read ADC value\n");
@@ -50,19 +51,21 @@ void ads111x_test(void *pvParameters)
     gain_val = ads111x_gain_values[GAIN];
 
     ESP_ERROR_CHECK(ads111x_init_desc(&device, ADC_ADDR, I2C_PORT, SDA_GPIO, SCL_GPIO));
-    ESP_ERROR_CHECK(ads111x_set_mode(&device, ADS111X_MODE_SINGLE_SHOT));  // Continuous conversion mode
-    ESP_ERROR_CHECK(ads111x_set_data_rate(&device, ADS111X_DATA_RATE_16)); // 32 samples per second
-    ESP_ERROR_CHECK(ads111x_set_input_mux(&device, ADS111X_MUX_0_GND));   // positive = AIN0, negative = GND
+    ESP_ERROR_CHECK(ads111x_set_mode(&device, ADS111X_MODE_CONTINUOUS));  // Continuous conversion mode
+    ESP_ERROR_CHECK(ads111x_set_data_rate(&device, ADS111X_DATA_RATE_8)); // 32 samples per second
+    // ESP_ERROR_CHECK(ads111x_set_input_mux(&device, ADS111X_MUX_0_GND));   // positive = AIN0, negative = GND
     ESP_ERROR_CHECK(ads111x_set_gain(&device, GAIN));
 
     while (1)
     {
-        measure(ADS111X_MUX_0_GND);
-        measure(ADS111X_MUX_1_GND);
-        measure(ADS111X_MUX_2_GND);
-        measure(ADS111X_MUX_3_GND);
+        
+        measure(ADS111X_MUX_3_GND,0);
+        measure(ADS111X_MUX_0_GND,1);
+        measure(ADS111X_MUX_1_GND,2);
+        measure(ADS111X_MUX_2_GND,3);
+        printf("\n");
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 }
 
