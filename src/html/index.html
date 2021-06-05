@@ -65,7 +65,6 @@
         .slider_row {
             width: 88%;
         }
-
     </style>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
@@ -75,15 +74,87 @@
     <h1>Cerera lamp</h1>
     <table id="list">
     </table>
+    <h2>PH limits</h2>
+    <table id="ph-list">
+        <tr class="slidecontainer">
+            <td class="channel_row">min PH</td>
+            <td class="slider_row"><input type="range" min="0" max="700" class="slider" id="min-ph"></td>
+            <td id="min-ph-value">0</td>
+        </tr>
+        <tr class="slidecontainer">
+            <td class="channel_row">max PH</td>
+            <td class="slider_row"><input type="range" min="0" max="700" class="slider" id="max-ph"></td>
+            <td id="max-ph-value">0</td>
+        </tr>
+    </table>
+    <h2>Calibration</h2>
+
+    <button type="button" id="cal-4">calibrate 4.0 ph</button>
+    <button type="button" id="cal-7">calibrate 7.0 ph</button>
+
 </body>
 
 
 <script>
     function httpReq(method, theUrl) {
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open(method, theUrl, false); // false for synchronous request
-        xmlHttp.send(null);
-        return xmlHttp.responseText;
+        var xhr = new XMLHttpRequest();
+        xhr.open(method, theUrl, false); // false for synchronous request
+        xhr.send(null);
+        return xhr.responseText;
+    }
+
+    function httpReqAsync(method, theUrl, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(method, theUrl, true); // false for synchronous request
+
+        xhr.onload = function (e) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    if (callback != null) {
+                        callback(e)
+                    }
+                } else {
+                    console.error(xhr.statusText);
+                }
+            }
+        };
+        xhr.onerror = function (e) {
+            console.error(xhr.statusText);
+        };
+        xhr.send(null);
+    }
+
+    //load ph values from controller
+    httpReqAsync("GET", `/ph`, function (e) {
+        let r = JSON.parse(e.target.responseText);
+        document.getElementById('min-ph').value = r.phMin * 100;
+        document.getElementById('min-ph-value').innerText = r.phMin.toFixed(2);
+
+        document.getElementById('max-ph').value = r.phMax * 100;
+        document.getElementById('max-ph-value').innerText = r.phMax.toFixed(2);
+    });
+
+    function onPhChange() {
+        let mn = document.getElementById('min-ph').value / 100.0;
+        let mx = document.getElementById('max-ph').value / 100.0;
+        httpReqAsync("PUT", `/ph?min_ph=${mn}&max_ph=${mx}`, null)
+    }
+    document.getElementById('max-ph').onchange = onPhChange
+    document.getElementById('min-ph').onchange = onPhChange
+
+    document.getElementById('min-ph').oninput = function (e) {
+        document.getElementById('min-ph-value').innerText = e.target.value / 100.0;
+    }
+    document.getElementById('max-ph').oninput = function (e) {
+        document.getElementById('max-ph-value').innerText = e.target.value / 100.0;
+    }
+
+    document.getElementById('cal-4').onclick = () => {
+        httpReqAsync("PUT", `/ph4`, null)
+    }
+
+    document.getElementById('cal-7').onclick = () => {
+        httpReqAsync("PUT", `/ph7`, null)
     }
 
     let channelsData = JSON.parse(httpReq("GET", `/channels`));
@@ -107,27 +178,29 @@
 
         let td2 = document.createElement("td")
         td2.className = "slider_row"
-        let input = document.createElement("input");
-        input.type = "range";
-        input.min = "0";
-        input.max = "1023";
-        input.value = percent;
-        input.className = "slider";
-        input.id = `channel-${i + 1}`;
-        input.oninput = function (e) {
+        let inp = document.createElement("input");
+        inp.type = "range";
+        inp.min = "0";
+        inp.max = "1023";
+        inp.value = percent;
+        inp.className = "slider";
+        inp.id = `channel-${i + 1}`;
+        inp.oninput = function (e) {
             td3.textContent = e.target.value
         }
-        input.onchange = function (e) {
+        inp.onchange = function (e) {
             httpReq("PUT", `/channels?channel=${i}&duty=${e.target.value}`)
         }
 
-        td2.appendChild(input)
-     
+        td2.appendChild(inp)
+
         tr.appendChild(td1);
         tr.appendChild(td2);
         tr.appendChild(td3);
         table.appendChild(tr);
     }
+
+
 </script>
 
 </html>

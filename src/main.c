@@ -21,6 +21,7 @@
 #include "init_config.h"
 #include "version.h"
 #include "adc.h"
+#include "ph_service.h"
 // #include <ads111x.h>
 
 static const char *TAG = "main";
@@ -34,6 +35,7 @@ void app_main(void)
 
     led_init();
     start_measuring();
+     start_ph_service();
 
     init_smart_config_counter_task();
     if (smartconfig)
