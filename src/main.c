@@ -35,6 +35,7 @@ void app_main(void)
 
     led_init();
     start_measuring();
+    init_relay();
     start_temperature_sensor();
     start_ph_service();
 

@@ -26,3 +26,5 @@
 #define SDA_GPIO 19
 #define SCL_GPIO 18
 #define TEMP_SENSOR_GPIO 4
+
+#define RELAY_PIN_0 0

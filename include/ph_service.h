@@ -5,13 +5,14 @@
 #include <freertos/task.h>
 #include "nvs.h"
 #include "temp_service.h"
+#include "relay.h"
 
 const char *phTAG = "ph_service";
 
 float ph_service_min_ph, ph_service_max_ph = 0;
 float ph_service_temperature = 25;
-float ph_service_neutralVoltage_mv = 1500.0;  //buffer solution 7.0 at 25C
-float ph_service_acidVoltage_mv = 2032.44;    //buffer solution 4.0 at 25C
+float ph_service_neutralVoltage_mv = 1500.0; //buffer solution 7.0 at 25C
+float ph_service_acidVoltage_mv = 2032.44;   //buffer solution 4.0 at 25C
 
 float readPH(float voltage, float temperature)
 {
@@ -29,15 +30,17 @@ void handle_ph(float ph)
     {
         //todo turn off c02
         ESP_LOGI(phTAG, "need to turn off the valve");
+        relay0_set_positive(true);
     }
     else if (ph < ph_service_min_ph)
     {
         //todo turn on co2
+        relay0_set_positive(false);
         ESP_LOGI(phTAG, "need to turn on the valve");
     }
     else
     {
-        ESP_LOGI(phTAG, "ph is ok");
+        ESP_LOGI(phTAG, "PH is ok");
         // do nothing
         // todo add some regulating coeficient
     }
@@ -69,14 +72,15 @@ void set_ph_levels(float min, float max)
     ph_service_min_ph = min;
 }
 
-uint32_t get_ph4(){
+uint32_t get_ph4()
+{
     return ph_service_acidVoltage_mv;
 }
 
-uint32_t get_ph7(){
+uint32_t get_ph7()
+{
     return ph_service_neutralVoltage_mv;
 }
-
 
 void set_ph4_level()
 {
@@ -92,7 +96,6 @@ void set_ph4_level()
         ESP_LOGE(phTAG, "failed to get ph4 calibration");
     }
 }
-
 
 void set_ph7_level()
 {
