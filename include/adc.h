@@ -5,11 +5,10 @@
 #include <freertos/task.h>
 #include <ads111x.h>
 #include <string.h>
+#include "pin_config.h"
 
 #define I2C_PORT 0
 
-#define SDA_GPIO 19
-#define SCL_GPIO 18
 
 #if defined(CONFIG_IDF_TARGET_ESP32S2)
 #define APP_CPU_NUM PRO_CPU_NUM

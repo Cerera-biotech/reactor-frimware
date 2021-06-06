@@ -88,8 +88,35 @@
         </tr>
     </table>
     <h2>Calibration</h2>
-
-    <button type="button" id="cal-4">calibrate 4.0 ph</button>
+    <p>Calibration should be done once a month. To calibrate the ph sersor clean it and put in PH 4.0 solution and press "calibrate PH 4.0" button. Then clear the sensor and put it into PH 7.0 solution and press "calibrate 7.0 ph" button.</p>
+    <table id="ph-list">
+        <tr class="slidecontainer">
+            <td>calibration value</td>
+            <td>PH</td>
+            <td>voltage, mV</td>
+        </tr>
+        <tr class="slidecontainer">
+            <td>default</td>
+            <td>4.0</td>
+            <td>2032.44</td>
+        </tr>
+        <tr class="slidecontainer">
+            <td>default</td>
+            <td>7.0</td>
+            <td>1500.0</td>
+        </tr>
+        <tr class="slidecontainer">
+            <td>current</td>
+            <td>7.0</td>
+            <td id="ph7">1500.0</td>
+        </tr>
+        <tr class="slidecontainer">
+            <td>current</td>
+            <td>4.0</td>
+            <td id="ph4">1500.0</td>
+        </tr>
+    </table>
+    <button type="button" id="cal-4">calibrate PH 4.0</button>
     <button type="button" id="cal-7">calibrate 7.0 ph</button>
 
 </body>
@@ -132,6 +159,9 @@
 
         document.getElementById('max-ph').value = r.phMax * 100;
         document.getElementById('max-ph-value').innerText = r.phMax.toFixed(2);
+        
+        document.getElementById('ph4').innerText = r.ph4.toFixed(2);
+        document.getElementById('ph7').innerText = r.ph7.toFixed(2);
     });
 
     function onPhChange() {

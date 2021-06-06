@@ -78,6 +78,9 @@ esp_err_t ph_get_handler(httpd_req_t *req)
     float max_ph = nvs_get_max_ph();
     cJSON_AddItemToObject(root, "phMin", cJSON_CreateNumber(min_ph));
     cJSON_AddItemToObject(root, "phMax", cJSON_CreateNumber(max_ph));
+    cJSON_AddItemToObject(root, "ph4", cJSON_CreateNumber(get_ph4()));
+    cJSON_AddItemToObject(root, "ph7", cJSON_CreateNumber(get_ph7()));
+
 
     const char *my_json_string = cJSON_Print(root);
     // ESP_LOGI(HTTP_TAG, "my_json_string\n%s", my_json_string);

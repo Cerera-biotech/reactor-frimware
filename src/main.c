@@ -35,7 +35,8 @@ void app_main(void)
 
     led_init();
     start_measuring();
-     start_ph_service();
+    start_temperature_sensor();
+    start_ph_service();
 
     init_smart_config_counter_task();
     if (smartconfig)

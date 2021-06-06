@@ -1,3 +1,4 @@
+#pragma once
 // // esp 32 pico v3
 // #define GPIO_LED_CH0 22
 // #define GPIO_LED_CH1 21
@@ -21,3 +22,7 @@
 #define GPIO_LED_CH7 22
 #define GPIO_LED_CH8 21
 #define GPIO_LED_CH9 23
+
+#define SDA_GPIO 19
+#define SCL_GPIO 18
+#define TEMP_SENSOR_GPIO 4
